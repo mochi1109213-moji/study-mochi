@@ -1,0 +1,78 @@
+/* 全体の背景と文字色 */
+body {
+    font-family: sans-serif;
+    background-color: #0f0f0f; /* YouTube風の黒 */
+    color: white;
+    margin: 0;
+    padding: 20px;
+}
+
+/* ヘッダーのデザイン */
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+h1 {
+    color: #ff0000; /* YouTubeレッド */
+}
+
+/* 検索ボックス */
+.search-box {
+    margin-bottom: 20px;
+}
+
+input {
+    padding: 10px;
+    width: 60%;
+    border-radius: 20px 0 0 20px;
+    border: 1px solid #333;
+    background: #121212;
+    color: white;
+}
+
+button {
+    padding: 10px 20px;
+    border-radius: 0 20px 20px 0;
+    border: none;
+    background: #cc0000;
+    color: white;
+    cursor: pointer;
+}
+
+/* 動画をきれいに並べる（グリッド） */
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+/* 各動画カードの設定 */
+.video-card {
+    background: #1e1e1e;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.video-card:hover {
+    transform: scale(1.05);
+}
+
+.video-card img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+.video-card .info {
+    padding: 10px;
+}
+
+.video-card .title {
+    font-size: 0.9em;
+    font-weight: bold;
+    height: 2.4em;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
