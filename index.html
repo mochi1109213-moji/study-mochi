@@ -2,82 +2,116 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>学習用リサーチツール</title> <link rel="stylesheet" href="style.css">
+    <title>学習用リサーチツール</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 動画再生用の黒い画面（オーバーレイ）のスタイル */
+        #video-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 9999;
+            display: none; /* 最初は隠しておく */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        iframe {
+            width: 90%;
+            max-width: 800px;
+            aspect-ratio: 16 / 9;
+            border: 2px solid #444;
+            border-radius: 10px;
+        }
+        .close-btn {
+            margin-bottom: 15px;
+            padding: 10px 25px;
+            background: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <header>
         <h1>Study Search System</h1>
         <div class="search-box">
-            <input type="text" id="query" placeholder="キーワード...">
+            <input type="text" id="query" placeholder="キーワードを入力...">
             <button onclick="searchVideos()">検索</button>
         </div>
     </header>
+
     <main id="video-list" class="video-grid"></main>
 
-<script>
-    const API_KEY = 'AIzaSyD-IsJ0AoerX6uTN8-dG059fRKoObVVcb0';
+    <div id="video-overlay">
+        <button class="close-btn" onclick="closeVideo()">× 閉じる</button>
+        <div id="player-container" style="width: 100%; display: flex; justify-content: center;"></div>
+    </div>
 
-    async function searchVideos() {
-        const query = document.getElementById('query').value;
-        if (!query) return;
-        const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=10&key=${API_KEY}`;
-        
-        try {
-            const res = await fetch(url);
-            const data = await res.json();
-            displayResults(data.items);
-        } catch (e) {
-            alert("検索に失敗しました。");
-        }
-    }
+    <script>
+        // ★ 自分のAPIキーを入れてください
+        const API_KEY = 'AIzaSyD-IsJ0AoerX6uTN8-dG059fRKoObVVcb0';
 
-    function displayResults(videos) {
-        const container = document.getElementById('video-list');
-        container.innerHTML = ''; 
-        videos.forEach(video => {
-            const id = video.id.videoId;
-            const imgUrl = `https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&url=${encodeURIComponent(video.snippet.thumbnails.medium.url)}`;
+        async function searchVideos() {
+            const query = document.getElementById('query').value;
+            if (!query) return;
             
-            const div = document.createElement('div');
-            div.className = 'video-card';
-            div.innerHTML = `
-                <img src="${imgUrl}">
-                <div class="info">
-                    <div class="title">${video.snippet.title}</div>
-                    <button onclick="play('${id}')">資料を見る</button>
-                </div>
-            `;
-            container.appendChild(div);
-        });
-    }
-
-    // ★「資料」ボタンを押した時に動くメインの処理
-    function play(id) {
-        // すでに表示用の枠があるか確認し、なければ作る
-        let overlay = document.getElementById('video-overlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'video-overlay';
-            // 画面全体を覆う黒い背景の設定
-            overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center;";
-            document.body.appendChild(overlay);
+            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=10&key=${API_KEY}`;
+            
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                displayResults(data.items);
+            } catch (e) {
+                alert("検索中にエラーが発生しました。");
+            }
         }
 
-        // 画面を表示状態にする
-        overlay.style.display = 'flex';
+        function displayResults(videos) {
+            const container = document.getElementById('video-list');
+            container.innerHTML = ''; 
 
-        // 中身を書き換える（学校でブロックされにくいサーバーをiframeに入れる）
-        overlay.innerHTML = `
-            <button onclick="document.getElementById('video-overlay').style.display='none'" 
-                style="margin-bottom:15px; padding:10px 20px; background:#cc0000; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">
-                × 閉じる
-            </button>
-            <iframe src="https://inv.tux.pizza/embed/${id}" 
-                style="width:90%; max-width:800px; aspect-ratio:16/9; border:2px solid #333; border-radius:10px; background:black;" 
-                allowfullscreen>
-            </iframe>
-        `;
-    }
-</script>
+            videos.forEach(video => {
+                const id = video.id.videoId;
+                // 画像ブロック回避用の中継URL
+                const imgUrl = `https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&url=${encodeURIComponent(video.snippet.thumbnails.medium.url)}`;
+                
+                const div = document.createElement('div');
+                div.className = 'video-card';
+                div.innerHTML = `
+                    <img src="${imgUrl}">
+                    <div class="info">
+                        <div class="title">${video.snippet.title}</div>
+                        <button onclick="play('${id}')">資料を見る</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // 動画を再生する関数
+        function play(id) {
+            const overlay = document.getElementById('video-overlay');
+            const container = document.getElementById('player-container');
+            
+            // 学校でブロックされにくい中継サーバーの埋め込みURL
+            // inv.tux.pizza がダメなら invidious.nerdvpn.de などに変えてみてください
+            container.innerHTML = `<iframe src="https://invidious.nerdvpn.de/embed/${id}" allowfullscreen></iframe>`;
+            
+            overlay.style.display = 'flex';
+        }
+
+        // 動画を閉じる関数
+        function closeVideo() {
+            const overlay = document.getElementById('video-overlay');
+            const container = document.getElementById('player-container');
+            overlay.style.display = 'none';
+            container.innerHTML = ''; // 動画を停止させるために中身を空にする
+        }
+    </script>
 </body>
 </html>
