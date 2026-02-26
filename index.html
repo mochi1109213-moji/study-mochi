@@ -93,40 +93,14 @@
             });
         }
 
-        // 動画を再生する関数
-       function play(id) {
-    const overlay = document.getElementById('video-overlay');
-    const container = document.getElementById('player-container');
+   function play(id) {
+    // ページ内に表示するのではなく、フィルターにかかりにくいサイトを別タブで開く
+    // 「https://google.com/url?q=...」を通すと、学校のフィルターを騙せる場合があります
+    const finalUrl = `https://invidious.sethforprivacy.com/watch?v=${id}`;
+    const proxyUrl = `https://www.google.com/url?q=${encodeURIComponent(finalUrl)}`;
     
-    // 1つがダメでも他が通るかもしれない「中継サーバー」リスト
-    // URLを直接書くと検閲に引っかかる場合があるので、少し特殊な書き方をします
-    const hosts = [
-        'invidious.asir.dev',
-        'inv.tux.pizza',
-        'invidious.domain.glass',
-        'invidious.lunar.icu',
-        'invidious.mutatux.org'
-    ];
-    
-    // 毎回違うサーバーを試す（どれかが学校のリストから漏れていることを祈る）
-    const selectedHost = hosts[Math.floor(Math.random() * hosts.length)];
-    
-    // 💡 裏技：YouTube公式の「カスタマイズ用URL」を使う方法
-    // これが一番「学習用」に見えて通ることがあります
-    const alternativeUrl = `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&showinfo=0`;
-
-    // まずはマイナーな中継サーバーで試す
-    container.innerHTML = `<iframe src="https://${selectedHost}/embed/${id}" allowfullscreen></iframe>`;
-    
-    overlay.style.display = 'flex';
+    window.open(proxyUrl, '_blank');
 }
-        // 動画を閉じる関数
-        function closeVideo() {
-            const overlay = document.getElementById('video-overlay');
-            const container = document.getElementById('player-container');
-            overlay.style.display = 'none';
-            container.innerHTML = ''; // 動画を停止させるために中身を空にする
-        }
     </script>
 </body>
 </html>
