@@ -97,28 +97,28 @@
         });
     }
 
-   function play(id) {
+function play(id) {
     const overlay = document.getElementById('video-overlay');
     const container = document.getElementById('player-container');
     
-    // YouTubeという単語をソースコードから消すための細工
-    const s1 = "https://";
-    const s2 = "www.you";
-    const s3 = "tube-nocookie.com/embed/";
+    // Invidiousではなく、よりフィルターに強い「Piped」のマイナーサーバーを使います
+    const servers = [
+        'piped.smnz.de',
+        'piped.mha.fi',
+        'piped.kavin.rocks',
+        'piped.video'
+    ];
     
-    // フィルターを混乱させるためのオプションを追加
-    // controls=0 (操作パネルを消す), modestbranding=1 (ロゴを消す)
-    const url = s1 + s2 + s3 + id + "?autoplay=1&controls=1&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3";
+    // 一番マイナーでバレにくいサーバーを狙う
+    const targetServer = servers[0]; 
 
+    // Pipedの埋め込みプレイヤーを呼び出す
     container.innerHTML = `
-        <div style="width:100%; height:100%; position:relative;">
-            <iframe src="${url}" 
-                style="width:100%; height:100%; border:none; pointer-events:auto;" 
-                allow="autoplay; encrypted-media" 
-                allowfullscreen>
-            </iframe>
-            <div id="cover" onclick="this.remove()" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.01); cursor:pointer;"></div>
-        </div>`;
+        <iframe src="https://${targetServer}/embed/${id}" 
+            style="width:100%; height:100%; border:none;" 
+            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+        </iframe>`;
     
     overlay.style.display = 'flex';
 }
