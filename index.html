@@ -48,16 +48,25 @@
             });
         }
 
-        function play(id) {
-            // ★ブロックされていないサーバーを自動で選ぶ仕組み（一例）
-            const servers = [
-                'https://invidious.flokinet.to',
-                'https://inv.tux.pizza',
-                'https://invidious.io.lol'
-            ];
-            const randomServer = servers[Math.floor(Math.random() * servers.length)];
-            window.open(`${randomServer}/embed/${id}`, '_blank');
-        }
+        // ★ playVideo関数を以下のように書き換えます
+function playVideo(id) {
+    // 既存のリストを隠すか、上に重ねるためのエリアを作る
+    let overlay = document.getElementById('video-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'video-overlay';
+        overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center;";
+        document.body.appendChild(overlay);
+    }
+    overlay.style.display = 'flex';
+
+    // 学校にバレにくい「中継サーバー」を、iframeの中に隠して表示
+    // URLが外から見えないので、ブロックされにくくなります
+    overlay.innerHTML = `
+        <button onclick="document.getElementById('video-overlay').style.display='none'" style="margin-bottom:10px; padding:10px; background:#f44336; color:white; border:none; border-radius:5px; cursor:pointer;">閉じる</button>
+        <iframe src="https://inv.tux.pizza/embed/${id}" style="width:90%; max-width:800px; aspect-ratio:16/9; border:none; border-radius:10px;"></iframe>
+    `;
+}
     </script>
 </body>
 </html>
